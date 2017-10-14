@@ -6,52 +6,77 @@
 
 import React, { Component } from 'react';
 import {
-  Platform,
-  StyleSheet,
-  Text,
-  View
+  View,
+  FlatList,
+  Text
 } from 'react-native';
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+import { List, ListItem} from "react-native-elements";
 
-export default class App extends Component<{}> {
+
+export default class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      loading: false,
+      data: [],
+      page: 1,
+      seed: 1,
+      error: null,
+      refreshing: false,
+    };
+  }
+
+  componentDidMount() {
+    this.makeRemoteRequest();
+  }
+
+  makeRemoteRequest = () => {
+    const { page, seed } = this.state;
+    const url = `https://randomuser.me/api/?seed=${seed}&page=${page}&results=20`;
+    this.setState({ loading: true });
+    fetch(url)
+      .then(res => res.json())
+      .then(res => {
+        if (page === 1) {
+            this.setState({
+                data: res.results,
+                error: res.error || null,
+                loading: false,
+                refreshing: false
+            });
+        } else {
+            this.setState({
+                data: [...this.state.data, ...res.results],
+                error: res.error || null,
+                loading: false,
+                refreshing: false
+            });
+        }
+    })
+      .catch(error => {
+        this.setState({ error, loading: false });
+      });
+  };
+
   render() {
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit App.js
-        </Text>
-        <Text style={styles.instructions}>
-          {instructions}
-        </Text>
-      </View>
+      <List>
+        <FlatList
+          data={this.state.data}
+          renderItem={({ item }) => (
+            <ListItem
+              roundAvatar
+              title={`${item.name.first} ${item.name.last}`}
+              subtitle={item.email}
+              avatar={{ uri: item.picture.thumbnail }}
+            />
+          )}
+          keyExtractor={item => item.email}
+        />
+      </List>
     );
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
-});
