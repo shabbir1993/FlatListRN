@@ -18,7 +18,7 @@ export default class App extends Component {
       loading: false,
       data: [],
       page: 1,
-      seed: 1,
+      //seed: 1,
       error: null,
       refreshing: false,
     };
@@ -29,22 +29,24 @@ export default class App extends Component {
   }
 
   fetchData = () => {
-    const { page, seed } = this.state;
-    const url = `https://randomuser.me/api/?seed=${seed}&page=${page}&results=20`;
+    //const { page, seed } = this.state;
+    const {page} = this.state
+    //const url = `https://randomuser.me/api/?seed=${seed}&page=${page}&results=20`;
+    const url = `https://reqres.in/api/users?page=${page}`
     this.setState({ loading: true });
     fetch(url)
       .then(res => res.json())
       .then(res => {
         if (page === 1) {
             this.setState({
-                data: res.results,
+                data: res.data,
                 error: res.error || null,
                 loading: false,
                 refreshing: false
             });
         } else {
             this.setState({
-                data: [...this.state.data, ...res.results],
+                data: [...this.state.data, ...res.data],
                 error: res.error || null,
                 loading: false,
                 refreshing: false
@@ -74,12 +76,12 @@ export default class App extends Component {
           renderItem={({ item }) => (
             <ListItem
               roundAvatar
-              title={`${item.name.first} ${item.name.last}`}
-              subtitle={item.email}
-              avatar={{ uri: item.picture.thumbnail }}
+              title={`${item.first_name} ${item.last_name}`}
+              //subtitle={item.email}
+              avatar={{ uri: item.avatar }}
             />
           )}
-          keyExtractor={item => item.email}
+          keyExtractor={item => item.id}
           onEndReached = {this.LoadMore}
         />
       </List>
