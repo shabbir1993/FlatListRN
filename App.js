@@ -5,11 +5,7 @@
  */
 
 import React, { Component } from 'react';
-import {
-  View,
-  FlatList,
-  Text
-} from 'react-native';
+import {View,FlatList,Text} from 'react-native';
 
 import { List, ListItem} from "react-native-elements";
 
@@ -29,10 +25,10 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    this.makeRemoteRequest();
+    this.fetchData();
   }
 
-  makeRemoteRequest = () => {
+  fetchData = () => {
     const { page, seed } = this.state;
     const url = `https://randomuser.me/api/?seed=${seed}&page=${page}&results=20`;
     this.setState({ loading: true });
@@ -60,6 +56,16 @@ export default class App extends Component {
       });
   };
 
+  LoadMore = () => {
+      this.setState ({
+        page: this.state.page + 1
+      },
+      () => {
+        this.fetchData();
+      }
+    );
+  }
+
   render() {
     return (
       <List>
@@ -74,6 +80,7 @@ export default class App extends Component {
             />
           )}
           keyExtractor={item => item.email}
+          onEndReached = {this.LoadMore}
         />
       </List>
     );
