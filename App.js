@@ -5,10 +5,8 @@
  */
 
 import React, { Component } from 'react';
-import {View,FlatList,Text} from 'react-native';
-
-import { List, ListItem} from "react-native-elements";
-
+import {FlatList,View,Button} from 'react-native';
+import {ListItem} from "react-native-elements";
 
 export default class App extends Component {
   constructor(props) {
@@ -21,6 +19,8 @@ export default class App extends Component {
       //seed: 1,
       error: null,
       refreshing: false,
+      columns : 1,
+      key:1
     };
   }
 
@@ -53,9 +53,9 @@ export default class App extends Component {
             });
         }
     })
-      .catch(error => {
-        this.setState({ error, loading: false });
-      });
+    .catch(error => {
+      this.setState({ error, loading: false });
+    });
   };
 
   LoadMore = () => {
@@ -70,21 +70,29 @@ export default class App extends Component {
 
   render() {
     return (
-      <List>
+      <View>
+        <Button onPress = {() => {
+          let {columns,key} = this.state
+          columns = columns === 1 ? 2:1
+          this.setState({columns:columns,key:key+1})
+        }} title = "Toggle"></Button>
         <FlatList
+          key={this.state.key}
           data={this.state.data}
+          numColumns={this.state.columns}
           renderItem={({ item }) => (
             <ListItem
               roundAvatar
               title={`${item.first_name} ${item.last_name}`}
               //subtitle={item.email}
               avatar={{ uri: item.avatar }}
+              style = {{flex :1}}
             />
           )}
           keyExtractor={item => item.id}
           onEndReached = {this.LoadMore}
-        />
-      </List>
+        /> 
+      </View>  
     );
   }
 }
